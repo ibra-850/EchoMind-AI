@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EchoMind AI — Voice to Workflow</title>
+<meta name="description" content="Turn voice notes and meetings into action items, risks, and interactive mind maps.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="13" fill="none" stroke="#7c6cff" stroke-width="2"/><path d="M6 14h2.5l2-6 3 12 2.5-9 2 3H22" fill="none" stroke="#38e1c0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>EchoMind <b>AI</b></span>
+  </div>
+  <div class="top-actions">
+    <span id="modeBadge" class="badge demo">Demo mode</span>
+    <button class="btn ghost" id="settingsBtn">⚙ API key</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>From spoken ideas to <span class="grad">structured execution</span></h1>
+    <p>Record live, upload audio, or paste a transcript. EchoMind extracts decisions, tasks, risks and draws the map.</p>
+  </section>
+
+  <section class="card input-card">
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-tab="live">🎙 Live mic</button>
+      <button class="tab" data-tab="upload">📁 Upload audio</button>
+      <button class="tab" data-tab="text">✍ Paste text</button>
+    </div>
+
+    <div class="pane" id="pane-live">
+      <canvas id="wave" height="70"></canvas>
+      <div class="row">
+        <button class="btn primary" id="micBtn">Start recording</button>
+        <span id="micStatus" class="muted">Uses your browser's speech recognition (Chrome / Edge).</span>
+      </div>
+    </div>
+
+    <div class="pane hidden" id="pane-upload">
+      <label class="drop" id="drop">
+        <input type="file" id="fileInput" accept="audio/*" hidden>
+        <div id="dropText">Drop an audio file here or <u>browse</u><br><small>mp3, wav, m4a, webm · up to ~15 MB · needs a Gemini key</small></div>
+      </label>
+    </div>
+
+    <div class="pane hidden" id="pane-text"></div>
+
+    <label class="lbl" for="transcript">Transcript</label>
+    <textarea id="transcript" rows="7" placeholder="Your transcript appears here as you speak. You can also paste or edit text."></textarea>
+
+    <div class="row">
+      <button class="btn primary big" id="analyzeBtn">✨ Analyze</button>
+      <button class="btn ghost" id="sampleBtn">Load sample meeting</button>
+      <button class="btn ghost" id="clearBtn">Clear</button>
+    </div>
+    <div id="status" class="status hidden"></div>
+  </section>
+
+  <section id="results" class="hidden">
+    <div class="grid2">
+      <div class="card">
+        <h2>Executive summary</h2>
+        <p id="summary"></p>
+        <div class="chips" id="meta"></div>
+        <h3>Key decisions</h3>
+        <ul id="decisions" class="plain"></ul>
+      </div>
+      <div class="card">
+        <h2>Risks &amp; blockers</h2>
+        <ul id="risks" class="plain"></ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>Prioritized tasks</h2>
+        <div class="row tight">
+          <select id="ownerFilter" aria-label="Filter by owner"><option value="">All owners</option></select>
+          <select id="prioFilter" aria-label="Filter by priority">
+            <option value="">All priorities</option><option>High</option><option>Medium</option><option>Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="taskTable">
+          <thead><tr><th></th><th>Task</th><th>Owner</th><th>Deadline</th><th>Priority</th><th>Tags</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="row export">
+        <span class="muted">Export:</span>
+        <button class="btn ghost" data-export="md">Markdown</button>
+        <button class="btn ghost" data-export="json">JSON</button>
+        <button class="btn ghost" data-export="csv">CSV (Trello/Jira import)</button>
+        <button class="btn ghost" data-export="copy">Copy Markdown</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>Interactive mind map</h2>
+        <div class="legend">
+          <i class="d topic"></i>Topic <i class="d decision"></i>Decision <i class="d task"></i>Task <i class="d risk"></i>Risk
+        </div>
+      </div>
+      <div id="mapWrap"><svg id="map" xmlns="http://www.w3.org/2000/svg"></svg></div>
+      <p class="muted small">Drag to pan · scroll to zoom · click a node for details · dashed lines are task dependencies.</p>
+      <div id="nodeInfo" class="nodeinfo hidden"></div>
+    </div>
+  </section>
+</main>
+
+<footer>Built for the hackathon · EchoMind AI · Your API key stays in your browser.</footer>
+
+<dialog id="settings">
+  <form method="dialog">
+    <h3>Gemini API key</h3>
+    <p class="muted small">Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com</a>. It is stored only in this browser's localStorage. Without a key the app runs in demo mode with sample output.</p>
+    <input type="password" id="keyInput" placeholder="AIza..." autocomplete="off">
+    <label class="lbl" for="modelInput">Model</label>
+    <input type="text" id="modelInput" value="gemini-2.5-flash">
+    <div class="row">
+      <button class="btn primary" id="saveKey" value="save">Save</button>
+      <button class="btn ghost" id="removeKey" value="remove">Remove key</button>
+      <button class="btn ghost" value="cancel">Close</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>
